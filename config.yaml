@@ -1,0 +1,7 @@
+elasticsearch:
+  host: http://localhost:9200
+  username:
+  password:
+  solar_index: solarcell
+  daily_production_index: daily_production
+  monthly_production_index: monthly_production
