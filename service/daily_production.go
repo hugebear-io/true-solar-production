@@ -26,6 +26,12 @@ func NewDailyProductionService(solarRepo repo.SolarRepo, logger logger.Logger) D
 }
 
 func (s dailyProductionService) Run(start, end *time.Time) error {
+	defer func() {
+		if r := recover(); r != nil {
+			s.logger.Warnf("[%v]DailyProduction.Run(): %v", start.Format(constant.YEAR_MONTH_DAY), r)
+		}
+	}()
+
 	documents, err := s.generateDocuments(start, end)
 	if err != nil {
 		s.logger.Errorf("[%v]DailyProduction.Run(): %v", start.Format(constant.YEAR_MONTH_DAY), err)
