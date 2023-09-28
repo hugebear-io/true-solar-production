@@ -5,3 +5,10 @@ elasticsearch:
   solar_index: solarcell
   daily_production_index: daily_production
   monthly_production_index: monthly_production
+
+redis:
+  host: localhost
+  port: 6379
+  username:
+  password:
+  db: 0
