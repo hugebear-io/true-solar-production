@@ -1,3 +1,6 @@
+apply_schema:
+	atlas schema apply --url "sqlite://database.db" --to "file://script/schema.hcl"
+
 dp:
 	go run ./cmd/daily_production/main.go
 

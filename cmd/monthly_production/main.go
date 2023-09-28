@@ -1,10 +1,9 @@
 package main
 
 import (
-	"time"
-
 	"github.com/hugebear-io/true-solar-production/config"
 	"github.com/hugebear-io/true-solar-production/handler"
+	"github.com/hugebear-io/true-solar-production/util"
 )
 
 func init() {
@@ -12,8 +11,7 @@ func init() {
 }
 
 func init() {
-	loc, _ := time.LoadLocation("Asia/Bangkok")
-	time.Local = loc
+	util.SetTimezone()
 }
 
 func main() {
