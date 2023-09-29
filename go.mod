@@ -7,7 +7,7 @@ require (
 	github.com/bytedance/sonic v1.10.1
 	github.com/gammazero/workerpool v1.1.3
 	github.com/go-playground/validator v9.31.0+incompatible
-	github.com/mattn/go-sqlite3 v1.14.17
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/spf13/viper v1.16.0
 	go.openly.dev/pointy v1.3.0
@@ -18,8 +18,10 @@ require (
 )
 
 require (
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.0 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gammazero/deque v0.2.0 // indirect
@@ -36,6 +38,7 @@ require (
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/mattn/go-sqlite3 v1.14.17 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
