@@ -8,6 +8,7 @@ require (
 	github.com/gammazero/workerpool v1.1.3
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-redis/redis/v8 v8.11.5
+	github.com/gosnmp/gosnmp v1.36.1
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/spf13/viper v1.16.0
 	go.openly.dev/pointy v1.3.0
