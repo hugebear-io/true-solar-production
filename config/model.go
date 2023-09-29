@@ -3,6 +3,7 @@ package config
 type Config struct {
 	Elastic ElasticsearchConfig `mapstructure:"elasticsearch"`
 	Redis   RedisConfig         `mapstructure:"redis"`
+	Snmp    SnmpConfig          `mapstructure:"snmp"`
 }
 
 type ElasticsearchConfig struct {
@@ -20,4 +21,10 @@ type RedisConfig struct {
 	Username string `mapstructure:"username"`
 	Password string `mapstructure:"password"`
 	DB       int    `mapstructure:"db"`
+}
+
+type SnmpConfig struct {
+	AgentHost  string `mapstructure:"agent_host"`
+	TargetHost string `mapstructure:"target_host"`
+	TargetPort uint16 `mapstructure:"target_port"`
 }
