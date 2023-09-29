@@ -17,14 +17,14 @@ type snmpRepo struct {
 	targetPort uint16
 }
 
-func NewSnmpRepo(client *gosnmp.GoSNMP) (SnmpRepo, error) {
+func NewSnmpRepo(client *gosnmp.GoSNMP) SnmpRepo {
 	conf := config.GetConfig().Snmp
 	return &snmpRepo{
 		client:     client,
 		agentHost:  conf.AgentHost,
 		targetHost: conf.TargetHost,
 		targetPort: conf.TargetPort,
-	}, nil
+	}
 }
 
 func (r *snmpRepo) SendAlarmTrap(deviceName, alertName, description, severity, lastedUpdateTime string) error {

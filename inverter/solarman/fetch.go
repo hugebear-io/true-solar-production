@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/bytedance/sonic"
 	"github.com/hugebear-io/true-solar-production/util"
@@ -41,7 +42,9 @@ func prepareHttpRequest(method, url string, headers map[string]string, data inte
 
 func prepareHttpResponse[R interface{}](req *http.Request) (*R, int, error) {
 	// request to endpoint
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: time.Duration(300) * time.Second,
+	}
 	res, err := client.Do(req)
 	if err != nil {
 		return nil, res.StatusCode, err
