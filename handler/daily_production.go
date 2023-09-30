@@ -55,8 +55,14 @@ func (h DailyProductionHandler) run(start, end *time.Time) func() {
 			return
 		}
 
+		masterSiteRepo, err := repo.NewMasterSiteRepo()
+		if err != nil {
+			logger.Error(err)
+			return
+		}
+
 		solarRepo := repo.NewSolarRepo(elastic)
-		serv := service.NewDailyProductionService(solarRepo, logger)
+		serv := service.NewDailyProductionService(solarRepo, masterSiteRepo, logger)
 		if err := serv.Run(start, end); err != nil {
 			logger.Error(err)
 		}

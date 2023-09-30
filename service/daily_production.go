@@ -17,12 +17,17 @@ type DailyProductionService interface {
 }
 
 type dailyProductionService struct {
-	solarRepo repo.SolarRepo
-	logger    logger.Logger
+	solarRepo      repo.SolarRepo
+	masterSiteRepo repo.MasterSiteRepo
+	logger         logger.Logger
 }
 
-func NewDailyProductionService(solarRepo repo.SolarRepo, logger logger.Logger) DailyProductionService {
-	return &dailyProductionService{solarRepo: solarRepo, logger: logger}
+func NewDailyProductionService(solarRepo repo.SolarRepo, masterSiteRepo repo.MasterSiteRepo, logger logger.Logger) DailyProductionService {
+	return &dailyProductionService{
+		solarRepo:      solarRepo,
+		masterSiteRepo: masterSiteRepo,
+		logger:         logger,
+	}
 }
 
 func (s dailyProductionService) Run(start, end *time.Time) error {
@@ -68,10 +73,12 @@ func (s dailyProductionService) generateDocuments(start, end *time.Time) ([]inte
 		return nil, err
 	}
 
+	masterSiteMap := s.masterSiteRepo.ExportToMap()
 	var count int
 	var size = len(data)
 	documents := make([]interface{}, 0)
 	for _, item := range data {
+		// |=> generated exist site
 		if item == nil {
 			continue
 		}
@@ -140,6 +147,36 @@ func (s dailyProductionService) generateDocuments(start, end *time.Time) ([]inte
 
 		count += 1
 		s.logger.Infof("[%v/%v] generateDocument of %v", count, size, start.Format(constant.YEAR_MONTH_DAY))
+		documents = append(documents, doc)
+
+		// |=> generated non-exist site
+		masterSite := model.MasterSite{
+			Vendor:   doc.VendorType,
+			Area:     doc.Area,
+			SiteName: doc.SiteName,
+		}
+		delete(masterSiteMap, masterSite.GetKey())
+	}
+
+	count = 0
+	size = len(masterSiteMap)
+	for _, site := range masterSiteMap {
+		doc := model.DailyProductionDocument{
+			Date:               start,
+			VendorType:         site.Vendor,
+			Area:               site.Area,
+			SiteName:           site.SiteName,
+			InstalledCapacity:  site.InstalledCapacity,
+			DailyProduction:    nil,
+			Latitude:           site.Latitude,
+			Longitude:          site.Longitude,
+			Target:             nil,
+			ProductionToTarget: nil,
+			Criteria:           nil,
+		}
+
+		count += 1
+		s.logger.Infof("[%v/%v] non-exist generateDocument of %v", count, size, start.Format(constant.YEAR_MONTH_DAY))
 		documents = append(documents, doc)
 	}
 
