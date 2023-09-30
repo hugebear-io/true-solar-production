@@ -37,7 +37,7 @@ func (h SolarmanCollectorHandler) Mock() {
 		return
 	}
 
-	pool := workerpool.New(1)
+	pool := workerpool.New(len(credentials))
 	for _, credential := range credentials {
 		clone := credential
 		pool.Submit(h.mock(&clone))

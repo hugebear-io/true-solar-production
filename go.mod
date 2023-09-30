@@ -12,6 +12,7 @@ require (
 	github.com/gocarina/gocsv v0.0.0-20230616125104-99d496ca653d
 	github.com/gosnmp/gosnmp v1.36.1
 	github.com/olivere/elastic/v7 v7.0.32
+	github.com/sourcegraph/conc v0.3.0
 	github.com/spf13/viper v1.16.0
 	go.openly.dev/pointy v1.3.0
 	go.uber.org/zap v1.21.0
@@ -56,7 +57,6 @@ require (
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
-	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
