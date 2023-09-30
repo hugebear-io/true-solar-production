@@ -76,7 +76,7 @@ func (r *solarRepo) GetPlantDailyProduction(start, end *time.Time) ([]*elastic.A
 	compositeAggregation := elastic.NewCompositeAggregation().
 		Size(10000).
 		Sources(
-			elastic.NewCompositeAggregationDateHistogramValuesSource("date").Field("@timestamp").CalendarInterval("day").Format("yyyy-MM-dd"),
+			elastic.NewCompositeAggregationDateHistogramValuesSource("date").Field("@timestamp").CalendarInterval("day").Format("yyyy-MM-dd").TimeZone("Asia/Bangkok"),
 			elastic.NewCompositeAggregationTermsValuesSource("vendor_type").Field("vendor_type.keyword"),
 			elastic.NewCompositeAggregationTermsValuesSource("area").Field("area.keyword"),
 			elastic.NewCompositeAggregationTermsValuesSource("name").Field("name.keyword"),
@@ -153,7 +153,7 @@ func (r *solarRepo) GetPlantMonthlyProduction(start, end *time.Time) ([]*elastic
 	compositeAggregation := elastic.NewCompositeAggregation().
 		Size(10000).
 		Sources(
-			elastic.NewCompositeAggregationDateHistogramValuesSource("date").Field("@timestamp").CalendarInterval("month").Format("yyyy-MM-dd"),
+			elastic.NewCompositeAggregationDateHistogramValuesSource("date").Field("@timestamp").CalendarInterval("month").Format("yyyy-MM-dd").TimeZone("Asia/Bangkok"),
 			elastic.NewCompositeAggregationTermsValuesSource("vendor_type").Field("vendor_type.keyword"),
 			elastic.NewCompositeAggregationTermsValuesSource("area").Field("area.keyword"),
 			elastic.NewCompositeAggregationTermsValuesSource("name").Field("name.keyword"),
