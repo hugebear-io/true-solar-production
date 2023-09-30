@@ -15,6 +15,8 @@ func init() {
 }
 
 func main() {
-	hdl := handler.NewSolarmanAlarmHandler()
+	// hdl := handler.NewSolarmanAlarmHandler()
+	// hdl.Mock()
+	hdl := handler.NewSolarmanCollectorHandler()
 	hdl.Mock()
 }

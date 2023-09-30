@@ -1,9 +1,10 @@
 package config
 
 type Config struct {
-	Elastic ElasticsearchConfig `mapstructure:"elasticsearch"`
-	Redis   RedisConfig         `mapstructure:"redis"`
-	Snmp    SnmpConfig          `mapstructure:"snmp"`
+	Elastic  ElasticsearchConfig `mapstructure:"elasticsearch"`
+	Redis    RedisConfig         `mapstructure:"redis"`
+	Snmp     SnmpConfig          `mapstructure:"snmp"`
+	Solarman InverterConfig      `mapstructure:"solarman"`
 }
 
 type ElasticsearchConfig struct {
@@ -11,6 +12,7 @@ type ElasticsearchConfig struct {
 	Username               string `mapstructure:"username"`
 	Password               string `mapstructure:"password"`
 	SolarIndex             string `mapstructure:"solar_index"`
+	SiteStationIndex       string `mapstructure:"site_station_index"`
 	DailyProductionIndex   string `mapstructure:"daily_production_index"`
 	MonthlyProductionIndex string `mapstructure:"monthly_production_index"`
 }
@@ -27,4 +29,9 @@ type SnmpConfig struct {
 	AgentHost  string `mapstructure:"agent_host"`
 	TargetHost string `mapstructure:"target_host"`
 	TargetPort uint16 `mapstructure:"target_port"`
+}
+
+type InverterConfig struct {
+	CollectorCrontab string `mapstructure:"collector_crontab"`
+	AlarmCrontab     string `mapstructure:"alarm_crontab"`
 }

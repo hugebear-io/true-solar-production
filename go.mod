@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/TylerBrock/colorjson v0.0.0-20200706003622-8a50f05110d2
+	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/bytedance/sonic v1.10.1
 	github.com/gammazero/workerpool v1.1.3
 	github.com/go-playground/validator v9.31.0+incompatible
@@ -20,7 +21,6 @@ require (
 )
 
 require (
-	github.com/avast/retry-go v3.0.0+incompatible // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.0 // indirect

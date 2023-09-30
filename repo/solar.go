@@ -8,6 +8,7 @@ import (
 
 	"github.com/hugebear-io/true-solar-production/config"
 	"github.com/hugebear-io/true-solar-production/constant"
+	"github.com/hugebear-io/true-solar-production/model"
 	"github.com/olivere/elastic/v7"
 )
 
@@ -15,6 +16,7 @@ type SolarRepo interface {
 	BulkIndex(index string, docs []interface{}) error
 	GetPlantDailyProduction(start, end *time.Time) ([]*elastic.AggregationBucketCompositeItem, error)
 	GetPlantMonthlyProduction(start, end *time.Time) ([]*elastic.AggregationBucketCompositeItem, error)
+	UpsertSiteStation(docs []model.SiteItem) error
 }
 
 type solarRepo struct {
@@ -62,6 +64,26 @@ func (r *solarRepo) BulkIndex(index string, docs []interface{}) error {
 
 	ctx := context.Background()
 	if _, err := bulk.Do(ctx); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *solarRepo) UpsertSiteStation(docs []model.SiteItem) error {
+	index := config.GetConfig().Elastic.SiteStationIndex
+	err := r.createIndexIfNotExist(index)
+	if err != nil {
+		return err
+	}
+
+	bulk := r.elastic.Bulk()
+	for _, doc := range docs {
+		bulk.Add(elastic.NewBulkUpdateRequest().Index(index).Id(doc.SiteID).Doc(doc).DocAsUpsert(true))
+	}
+
+	_, err = bulk.Do(context.Background())
+	if err != nil {
 		return err
 	}
 

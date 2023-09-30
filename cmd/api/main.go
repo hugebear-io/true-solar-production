@@ -1,16 +1,16 @@
 package main
 
 import (
-	"context"
-
-	"github.com/hugebear-io/true-solar-production/infra"
+	"github.com/hugebear-io/true-solar-production/repo"
+	"github.com/hugebear-io/true-solar-production/util"
 )
 
 func main() {
-	rdb, _ := infra.NewRedis()
-	ctx := context.TODO()
-	if err := rdb.FlushAll(ctx).Err(); err != nil {
+	repo, err := repo.NewMasterSiteRepo()
+	if err != nil {
 		panic(err)
 	}
 
+	data := repo.ExportToMap()
+	util.PrintJSON(map[string]interface{}{"x": data})
 }
