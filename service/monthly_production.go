@@ -37,6 +37,7 @@ func (s monthlyProductionService) Run(start, end *time.Time) error {
 		s.logger.Errorf("[%v]MonthlyProduction.Run(): %v", start.Format(constant.YEAR_MONTH), err)
 		return err
 	}
+	s.logger.Infof("[%v]MonthlyProduction.Run(): generated %v documents", start.Format(constant.YEAR_MONTH), len(documents))
 
 	if len(documents) == 0 {
 		s.logger.Errorf("[%v]MonthlyProduction.Run(): %v", start.Format(constant.YEAR_MONTH), "documents is empty")
@@ -57,6 +58,12 @@ func (s monthlyProductionService) Run(start, end *time.Time) error {
 func (s monthlyProductionService) generateDocuments(start, end *time.Time) ([]interface{}, error) {
 	data, err := s.solarRepo.GetPlantMonthlyProduction(start, end)
 	if err != nil {
+		s.logger.Error(err)
+		return nil, err
+	}
+
+	if data == nil {
+		err := fmt.Errorf("[%v]MonthlyProduction.Run(): %v", start.Format(constant.YEAR_MONTH), "aggregate productions are empty")
 		s.logger.Error(err)
 		return nil, err
 	}
