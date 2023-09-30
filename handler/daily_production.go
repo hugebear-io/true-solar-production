@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"math"
 	"time"
 
@@ -37,11 +36,6 @@ func (h DailyProductionHandler) Run() {
 
 func (h DailyProductionHandler) run(start, end *time.Time) func() {
 	return func() {
-		elastic, err := infra.NewElasticsearch()
-		if err != nil {
-			fmt.Println(err)
-		}
-
 		logger := logger.NewLogger(
 			&logger.LoggerOption{
 				LogName:     "logs/daily_production.log",
@@ -54,6 +48,12 @@ func (h DailyProductionHandler) run(start, end *time.Time) func() {
 			},
 		)
 		defer logger.Close()
+
+		elastic, err := infra.NewElasticsearch()
+		if err != nil {
+			logger.Errorf("Failed to connect to elasticsearch")
+			return
+		}
 
 		solarRepo := repo.NewSolarRepo(elastic)
 		serv := service.NewDailyProductionService(solarRepo, logger)

@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/gammazero/workerpool"
@@ -39,11 +38,6 @@ func (h MonthlyProductionHandler) Run() {
 
 func (h MonthlyProductionHandler) run(start, end *time.Time) func() {
 	return func() {
-		elastic, err := infra.NewElasticsearch()
-		if err != nil {
-			fmt.Println(err)
-		}
-
 		logger := logger.NewLogger(
 			&logger.LoggerOption{
 				LogName:     "logs/monthly_production.log",
@@ -56,6 +50,12 @@ func (h MonthlyProductionHandler) run(start, end *time.Time) func() {
 			},
 		)
 		defer logger.Close()
+
+		elastic, err := infra.NewElasticsearch()
+		if err != nil {
+			logger.Errorf("Failed to connect to elasticsearch")
+			return
+		}
 
 		solarRepo := repo.NewSolarRepo(elastic)
 		serv := service.NewMonthlyProductionService(solarRepo, logger)

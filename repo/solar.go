@@ -132,6 +132,10 @@ func (r *solarRepo) GetPlantDailyProduction(start, end *time.Time) ([]*elastic.A
 		return nil, err
 	}
 
+	if result == nil {
+		return nil, errors.New("cannot get result")
+	}
+
 	if result.Aggregations == nil {
 		return nil, errors.New("cannot get result aggregation")
 	}
@@ -207,6 +211,10 @@ func (r *solarRepo) GetPlantMonthlyProduction(start, end *time.Time) ([]*elastic
 	result, err := query.Pretty(true).Do(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	if result == nil {
+		return nil, errors.New("cannot get result")
 	}
 
 	if result.Aggregations == nil {
