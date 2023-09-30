@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/gammazero/workerpool"
+	"github.com/hugebear-io/true-solar-production/constant"
 	"github.com/hugebear-io/true-solar-production/infra"
 	"github.com/hugebear-io/true-solar-production/logger"
 	"github.com/hugebear-io/true-solar-production/repo"
@@ -53,12 +54,18 @@ func (h MonthlyProductionHandler) run(start, end *time.Time) func() {
 
 		elastic, err := infra.NewElasticsearch()
 		if err != nil {
-			logger.Errorf("Failed to connect to elasticsearch")
+			logger.Errorf("[%v]Failed to connect to elasticsearch", start.Format(constant.YEAR_MONTH))
+			return
+		}
+
+		masterSiteRepo, err := repo.NewMasterSiteRepo()
+		if err != nil {
+			logger.Error(err)
 			return
 		}
 
 		solarRepo := repo.NewSolarRepo(elastic)
-		serv := service.NewMonthlyProductionService(solarRepo, logger)
+		serv := service.NewMonthlyProductionService(solarRepo, masterSiteRepo, logger)
 		if err := serv.Run(start, end); err != nil {
 			logger.Error(err)
 		}

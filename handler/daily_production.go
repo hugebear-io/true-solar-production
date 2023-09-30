@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gammazero/workerpool"
+	"github.com/hugebear-io/true-solar-production/constant"
 	"github.com/hugebear-io/true-solar-production/infra"
 	"github.com/hugebear-io/true-solar-production/logger"
 	"github.com/hugebear-io/true-solar-production/repo"
@@ -51,7 +52,7 @@ func (h DailyProductionHandler) run(start, end *time.Time) func() {
 
 		elastic, err := infra.NewElasticsearch()
 		if err != nil {
-			logger.Errorf("Failed to connect to elasticsearch")
+			logger.Errorf("[%v]Failed to connect to elasticsearch", start.Format(constant.YEAR_MONTH_DAY))
 			return
 		}
 
