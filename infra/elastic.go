@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/avast/retry-go"
 	"github.com/hugebear-io/true-solar-production/config"
 	"github.com/olivere/elastic/v7"
 )
@@ -45,7 +46,28 @@ func NewElasticsearch() (*elastic.Client, error) {
 	)
 
 	if err != nil {
-		return nil, err
+		retryOptions := []retry.Option{
+			retry.Delay(60 * time.Second),
+			retry.Attempts(3),
+			retry.DelayType(retry.FixedDelay),
+		}
+
+		err = retry.Do(func() error {
+			client, err = elastic.NewClient(
+				elastic.SetURL(conf.Host),
+				elastic.SetScheme(scheme),
+				elastic.SetBasicAuth(conf.Username, conf.Password),
+				elastic.SetSniff(false),
+				elastic.SetHttpClient(httpClient),
+				elastic.SetHealthcheckTimeout(time.Duration(300)*time.Second),
+			)
+
+			return err
+		}, retryOptions...)
+
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return client, nil
