@@ -174,7 +174,7 @@ func (s *solarmanCollectorService) run(credential *model.SolarmanCredential, doc
 			plantCount := 1
 			plantSize := len(plantList)
 			for _, station := range plantList {
-				s.logger.Infof("[%v] - collecting plant(%v): %v/%v", credential.Username, station.GetID(), plantCount, plantSize)
+				s.logger.Infof("[%v] - collecting plant(%v) of company(%v): %v/%v", credential.Username, station.GetID(), company.GetCompanyID(), plantCount, plantSize)
 				plantCount++
 
 				stationID := station.GetID()

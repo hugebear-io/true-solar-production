@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/gammazero/workerpool"
+	"github.com/hugebear-io/true-solar-production/constant"
 	"github.com/hugebear-io/true-solar-production/infra"
 	"github.com/hugebear-io/true-solar-production/logger"
 	"github.com/hugebear-io/true-solar-production/model"
@@ -10,16 +11,13 @@ import (
 )
 
 type SolarmanCollectorHandler struct {
+	logger logger.Logger
 }
 
 func NewSolarmanCollectorHandler() *SolarmanCollectorHandler {
-	return &SolarmanCollectorHandler{}
-}
-
-func (h SolarmanCollectorHandler) Mock() {
 	logger := logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     "logs/solarman_collector.log",
+			LogName:     constant.GetLogName(constant.SOLARMAN_COLLECTOR_LOG_NAME),
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,
@@ -28,12 +26,16 @@ func (h SolarmanCollectorHandler) Mock() {
 			SkipCaller:  1,
 		},
 	)
-	defer logger.Close()
 
+	return &SolarmanCollectorHandler{logger: logger}
+}
+
+func (h *SolarmanCollectorHandler) Mock() {
+	defer h.logger.Close()
 	credentialRepo := repo.NewMockSolarmanCredentialRepo()
 	credentials, err := credentialRepo.GetCredentials()
 	if err != nil {
-		logger.Error(err)
+		h.logger.Error(err)
 		return
 	}
 
@@ -45,43 +47,30 @@ func (h SolarmanCollectorHandler) Mock() {
 	pool.StopWait()
 }
 
-func (h SolarmanCollectorHandler) mock(credential *model.SolarmanCredential) func() {
+func (h *SolarmanCollectorHandler) mock(credential *model.SolarmanCredential) func() {
 	return func() {
-		logger := logger.NewLogger(
-			&logger.LoggerOption{
-				LogName:     "logs/solarman_collector.log",
-				LogSize:     1024,
-				LogAge:      90,
-				LogBackup:   1,
-				LogCompress: false,
-				LogLevel:    logger.LOG_LEVEL_DEBUG,
-				SkipCaller:  1,
-			},
-		)
-		defer logger.Close()
-
 		elastic, err := infra.NewElasticsearch()
 		if err != nil {
-			logger.Errorf("[%v]Failed to connect to elasticsearch", credential.Username)
+			h.logger.Errorf("[%v]Failed to connect to elasticsearch", credential.Username)
 			return
 		}
 		solarRepo := repo.NewSolarRepo(elastic)
 
 		db, err := infra.NewGormDB()
 		if err != nil {
-			logger.Errorf("[%v]Failed to connect to gorm", credential.Username)
+			h.logger.Errorf("[%v]Failed to connect to gorm", credential.Username)
 			return
 		}
 		siteRegionRepo := repo.NewSiteRegionMappingRepo(db)
 
-		serv, err := service.NewSolarmanCollectorService(solarRepo, siteRegionRepo, logger)
+		serv, err := service.NewSolarmanCollectorService(solarRepo, siteRegionRepo, h.logger)
 		if err != nil {
-			logger.Errorf("[%v]Failed to create service", credential.Username)
+			h.logger.Errorf("[%v]Failed to create service", credential.Username)
 			return
 		}
 
 		if err := serv.Run(credential); err != nil {
-			logger.Error(err)
+			h.logger.Error(err)
 		}
 	}
 }

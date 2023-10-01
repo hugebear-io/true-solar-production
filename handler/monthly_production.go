@@ -11,13 +11,28 @@ import (
 	"github.com/hugebear-io/true-solar-production/service"
 )
 
-type MonthlyProductionHandler struct{}
-
-func NewMonthlyProductionHandler() *MonthlyProductionHandler {
-	return &MonthlyProductionHandler{}
+type MonthlyProductionHandler struct {
+	logger logger.Logger
 }
 
-func (h MonthlyProductionHandler) Run() {
+func NewMonthlyProductionHandler() *MonthlyProductionHandler {
+	logger := logger.NewLogger(
+		&logger.LoggerOption{
+			LogName:     constant.GetLogName(constant.MONTHLY_PRODUCTION_LOG_NAME),
+			LogSize:     1024,
+			LogAge:      90,
+			LogBackup:   1,
+			LogCompress: false,
+			LogLevel:    logger.LOG_LEVEL_DEBUG,
+			SkipCaller:  1,
+		},
+	)
+
+	return &MonthlyProductionHandler{logger: logger}
+}
+
+func (h *MonthlyProductionHandler) Run() {
+	defer h.logger.Close()
 	pool := workerpool.New(5)
 	currentMonth := time.January
 	endDate := time.Now()
@@ -37,37 +52,24 @@ func (h MonthlyProductionHandler) Run() {
 	pool.StopWait()
 }
 
-func (h MonthlyProductionHandler) run(start, end *time.Time) func() {
+func (h *MonthlyProductionHandler) run(start, end *time.Time) func() {
 	return func() {
-		logger := logger.NewLogger(
-			&logger.LoggerOption{
-				LogName:     "logs/monthly_production.log",
-				LogSize:     1024,
-				LogAge:      90,
-				LogBackup:   1,
-				LogCompress: false,
-				LogLevel:    logger.LOG_LEVEL_DEBUG,
-				SkipCaller:  1,
-			},
-		)
-		defer logger.Close()
-
 		elastic, err := infra.NewElasticsearch()
 		if err != nil {
-			logger.Errorf("[%v]Failed to connect to elasticsearch", start.Format(constant.YEAR_MONTH))
+			h.logger.Errorf("[%v]Failed to connect to elasticsearch", start.Format(constant.YEAR_MONTH))
 			return
 		}
 
 		masterSiteRepo, err := repo.NewMasterSiteRepo()
 		if err != nil {
-			logger.Error(err)
+			h.logger.Error(err)
 			return
 		}
 
 		solarRepo := repo.NewSolarRepo(elastic)
-		serv := service.NewMonthlyProductionService(solarRepo, masterSiteRepo, logger)
+		serv := service.NewMonthlyProductionService(solarRepo, masterSiteRepo, h.logger)
 		if err := serv.Run(start, end); err != nil {
-			logger.Error(err)
+			h.logger.Error(err)
 		}
 	}
 }

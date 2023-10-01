@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/gammazero/workerpool"
+	"github.com/hugebear-io/true-solar-production/constant"
 	"github.com/hugebear-io/true-solar-production/infra"
 	"github.com/hugebear-io/true-solar-production/logger"
 	"github.com/hugebear-io/true-solar-production/model"
@@ -10,16 +11,13 @@ import (
 )
 
 type SolarmanAlarmHandler struct {
+	logger logger.Logger
 }
 
 func NewSolarmanAlarmHandler() *SolarmanAlarmHandler {
-	return &SolarmanAlarmHandler{}
-}
-
-func (h SolarmanAlarmHandler) Mock() {
 	logger := logger.NewLogger(
 		&logger.LoggerOption{
-			LogName:     "logs/solarman_alarm.log",
+			LogName:     constant.GetLogName(constant.SOLARMAN_ALARM_LOG_NAME),
 			LogSize:     1024,
 			LogAge:      90,
 			LogBackup:   1,
@@ -28,12 +26,16 @@ func (h SolarmanAlarmHandler) Mock() {
 			SkipCaller:  1,
 		},
 	)
-	defer logger.Close()
 
+	return &SolarmanAlarmHandler{logger: logger}
+}
+
+func (h *SolarmanAlarmHandler) Mock() {
+	defer h.logger.Close()
 	credentialRepo := repo.NewMockSolarmanCredentialRepo()
 	credentials, err := credentialRepo.GetCredentials()
 	if err != nil {
-		logger.Error(err)
+		h.logger.Error(err)
 		return
 	}
 
@@ -45,34 +47,21 @@ func (h SolarmanAlarmHandler) Mock() {
 	pool.StopWait()
 }
 
-func (h SolarmanAlarmHandler) mock(credential *model.SolarmanCredential) func() {
+func (h *SolarmanAlarmHandler) mock(credential *model.SolarmanCredential) func() {
 	return func() {
-		logger := logger.NewLogger(
-			&logger.LoggerOption{
-				LogName:     "logs/solarman_alarm.log",
-				LogSize:     1024,
-				LogAge:      90,
-				LogBackup:   1,
-				LogCompress: false,
-				LogLevel:    logger.LOG_LEVEL_DEBUG,
-				SkipCaller:  1,
-			},
-		)
-		defer logger.Close()
-
 		snmpRepo := repo.NewMockSnmpRepo()
 		defer snmpRepo.Close()
 
 		rdb, err := infra.NewRedis()
 		if err != nil {
-			logger.Error(err)
+			h.logger.Error(err)
 			return
 		}
 		defer rdb.Close()
 
-		serv := service.NewSolarmanAlarmService(snmpRepo, rdb, logger)
+		serv := service.NewSolarmanAlarmService(snmpRepo, rdb, h.logger)
 		if err := serv.Run(credential); err != nil {
-			logger.Error(err)
+			h.logger.Error(err)
 		}
 	}
 }

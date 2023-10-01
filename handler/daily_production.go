@@ -12,15 +12,29 @@ import (
 	"github.com/hugebear-io/true-solar-production/service"
 )
 
-type DailyProductionHandler struct{}
-
-func NewDailyProductionHandler() *DailyProductionHandler {
-	return &DailyProductionHandler{}
+type DailyProductionHandler struct {
+	logger logger.Logger
 }
 
-func (h DailyProductionHandler) Run() {
-	pool := workerpool.New(10)
+func NewDailyProductionHandler() *DailyProductionHandler {
+	logger := logger.NewLogger(
+		&logger.LoggerOption{
+			LogName:     constant.GetLogName(constant.DAILY_PRODUCTION_LOG_NAME),
+			LogSize:     1024,
+			LogAge:      90,
+			LogBackup:   1,
+			LogCompress: false,
+			LogLevel:    logger.LOG_LEVEL_DEBUG,
+			SkipCaller:  1,
+		},
+	)
 
+	return &DailyProductionHandler{logger: logger}
+}
+
+func (h *DailyProductionHandler) Run() {
+	defer h.logger.Close()
+	pool := workerpool.New(10)
 	startExecute := time.Date(2023, time.January, 1, 0, 0, 0, 0, time.Local)
 	endExecute := time.Now()
 	duration := int(math.Ceil(endExecute.Sub(startExecute).Hours() / 24))
@@ -35,37 +49,24 @@ func (h DailyProductionHandler) Run() {
 	pool.StopWait()
 }
 
-func (h DailyProductionHandler) run(start, end *time.Time) func() {
+func (h *DailyProductionHandler) run(start, end *time.Time) func() {
 	return func() {
-		logger := logger.NewLogger(
-			&logger.LoggerOption{
-				LogName:     "logs/daily_production.log",
-				LogSize:     1024,
-				LogAge:      90,
-				LogBackup:   1,
-				LogCompress: false,
-				LogLevel:    logger.LOG_LEVEL_DEBUG,
-				SkipCaller:  1,
-			},
-		)
-		defer logger.Close()
-
 		elastic, err := infra.NewElasticsearch()
 		if err != nil {
-			logger.Errorf("[%v]Failed to connect to elasticsearch", start.Format(constant.YEAR_MONTH_DAY))
+			h.logger.Errorf("[%v]Failed to connect to elasticsearch", start.Format(constant.YEAR_MONTH_DAY))
 			return
 		}
 
 		masterSiteRepo, err := repo.NewMasterSiteRepo()
 		if err != nil {
-			logger.Error(err)
+			h.logger.Error(err)
 			return
 		}
 
 		solarRepo := repo.NewSolarRepo(elastic)
-		serv := service.NewDailyProductionService(solarRepo, masterSiteRepo, logger)
+		serv := service.NewDailyProductionService(solarRepo, masterSiteRepo, h.logger)
 		if err := serv.Run(start, end); err != nil {
-			logger.Error(err)
+			h.logger.Error(err)
 		}
 	}
 }
