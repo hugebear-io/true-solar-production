@@ -4,8 +4,9 @@ table "tbl_solarman_credentials" {
   schema = schema.main
 
   column "id" {
-    null    = false
-    type    = int
+    null           = false
+    type           = integer
+    auto_increment = true
   }
 
   column "username" {
@@ -46,8 +47,9 @@ table "tbl_installed_capacity" {
   schema = schema.main
 
   column "id" {
-    null    = false
-    type    = int
+    null           = false
+    type           = integer
+    auto_increment = true
   }
 
   column "efficiency_factor" {
@@ -55,7 +57,58 @@ table "tbl_installed_capacity" {
   }
 
   column "focus_hour" {
-    type = int
+    type = integer
+  }
+
+  column "created_at" {
+    null    = false
+    type    = datetime
+    default = sql("CURRENT_TIMESTAMP")
+  }
+
+  column "updated_at" {
+    null      = false
+    type      = datetime
+    default   = sql("CURRENT_TIMESTAMP")
+    on_update = sql("CURRENT_TIMESTAMP")
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+}
+
+table "tbl_performance_alarm_config" {
+  schema = schema.main
+  column "id" {
+    null           = false
+    type           = integer
+    auto_increment = true
+  }
+
+  column "name" {
+    type = varchar(256)
+    null = false
+  }
+
+  column "interval" {
+    type = integer
+    null = false
+  }
+
+  column "hit_day" {
+    type = integer
+    null = true
+  }
+
+  column "percentage" {
+    type = float
+    null = false
+  }
+
+  column "duration" {
+    type = integer
+    null = true
   }
 
   column "created_at" {
@@ -80,8 +133,9 @@ table "tbl_site_region_mapping" {
   schema = schema.main
 
   column "id" {
-    null    = false
-    type    = int
+    null           = false
+    type           = integer
+    auto_increment = true
   }
 
   column "code" {

@@ -2,8 +2,6 @@ package model
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type InstalledCapacity struct {
@@ -16,11 +14,4 @@ type InstalledCapacity struct {
 
 func (*InstalledCapacity) TableName() string {
 	return "tbl_installed_capacity"
-}
-
-func (r *InstalledCapacity) BeforeCreate(tx *gorm.DB) error {
-	var count int64
-	tx.Model(&InstalledCapacity{}).Count(&count)
-	r.ID = count + 1
-	return nil
 }

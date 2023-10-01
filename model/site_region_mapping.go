@@ -2,8 +2,6 @@ package model
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type SiteRegionMapping struct {
@@ -17,11 +15,4 @@ type SiteRegionMapping struct {
 
 func (*SiteRegionMapping) TableName() string {
 	return "tbl_site_region_mapping"
-}
-
-func (r *SiteRegionMapping) BeforeCreate(tx *gorm.DB) error {
-	var count int64
-	tx.Model(&SiteRegionMapping{}).Count(&count)
-	r.ID = count + 1
-	return nil
 }

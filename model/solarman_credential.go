@@ -2,8 +2,6 @@ package model
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type SolarmanCredential struct {
@@ -18,11 +16,4 @@ type SolarmanCredential struct {
 
 func (*SolarmanCredential) TableName() string {
 	return "tbl_solarman_credentials"
-}
-
-func (r *SolarmanCredential) BeforeCreate(tx *gorm.DB) error {
-	var count int64
-	tx.Model(&SolarmanCredential{}).Count(&count)
-	r.ID = count + 1
-	return nil
 }
