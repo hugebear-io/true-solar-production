@@ -3,8 +3,8 @@ package constant
 import "time"
 
 const (
-	LOW_PERFORMANCE_ALARM = "low_performance_alarm"
-	SUM_PERFORMANCE_ALARM = "sum_performance_alarm"
+	LOW_PERFORMANCE_ALARM = "PerformanceLow"
+	SUM_PERFORMANCE_ALARM = "SumPerformanceLow"
 )
 
 const (
