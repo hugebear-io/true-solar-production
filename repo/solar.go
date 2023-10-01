@@ -255,12 +255,9 @@ func (r *solarRepo) GetPlantMonthlyProduction(start, end *time.Time) ([]*elastic
 }
 
 func (r *solarRepo) GetPerformanceLow(duration int, efficiencyFactor float64, focusHour int, thresholdPct float64) ([]*elastic.AggregationBucketCompositeItem, error) {
-	ctx := context.Background()
-	items := make([]*elastic.AggregationBucketCompositeItem, 0)
-
 	compositeAggregation := elastic.NewCompositeAggregation().
 		Size(10000).
-		Sources(elastic.NewCompositeAggregationDateHistogramValuesSource("date").Field("@timestamp").CalendarInterval("1d").Format("yyyy-MM-dd"),
+		Sources(elastic.NewCompositeAggregationDateHistogramValuesSource("date").Field("@timestamp").CalendarInterval("day").Format("yyyy-MM-dd"),
 			elastic.NewCompositeAggregationTermsValuesSource("vendor_type").Field("vendor_type.keyword"),
 			elastic.NewCompositeAggregationTermsValuesSource("id").Field("id.keyword")).
 		SubAggregation("max_daily", elastic.NewMaxAggregation().Field("daily_production")).
@@ -284,48 +281,48 @@ func (r *solarRepo) GetPerformanceLow(duration int, efficiencyFactor float64, fo
 					"area", "site_id", "site_city_code", "site_city_name", "installed_capacity",
 				)))
 
-	searchQuery := r.searchIndex().
+	searchQuery := r.elastic.Search("solarcell*").
 		Size(0).
 		Query(elastic.NewBoolQuery().Must(
 			elastic.NewMatchQuery("data_type", constant.DATA_TYPE_PLANT),
-			elastic.NewRangeQuery("@timestamp").Gte(fmt.Sprintf("now-%dd/d", duration)).Lte("now-1d/d"),
+			elastic.NewRangeQuery("@timestamp").Gte("now-7d/d").Lte("now-1d/d"),
 		)).
 		Aggregation("performance_alarm", compositeAggregation)
 
-	firstResult, err := searchQuery.Pretty(true).Do(ctx)
+	items := make([]*elastic.AggregationBucketCompositeItem, 0)
+	result, err := searchQuery.Pretty(true).Do(context.Background())
 	if err != nil {
 		return nil, err
 	}
 
-	if firstResult.Aggregations == nil {
+	if result.Aggregations == nil {
 		return nil, errors.New("cannot get result aggregations")
 	}
 
-	performanceAlarm, found := firstResult.Aggregations.Composite("performance_alarm")
+	performanceAlarm, found := result.Aggregations.Composite("performance_alarm")
 	if !found {
 		return nil, errors.New("cannot get result composite performance alarm")
 	}
 
 	items = append(items, performanceAlarm.Buckets...)
-
 	if len(performanceAlarm.AfterKey) > 0 {
 		afterKey := performanceAlarm.AfterKey
 
 		for {
-			searchQuery = r.searchIndex().
+			query := r.elastic.Search("solarcell*").
 				Size(0).
 				Query(elastic.NewBoolQuery().Must(
 					elastic.NewMatchQuery("data_type", constant.DATA_TYPE_PLANT),
-					elastic.NewRangeQuery("@timestamp").Gte(fmt.Sprintf("now-%dd/d", duration)).Lte("now-1d/d"),
+					elastic.NewRangeQuery("@timestamp").Gte("now-7d/d").Lte("now-1d/d"),
 				)).
 				Aggregation("performance_alarm", compositeAggregation.AggregateAfter(afterKey))
 
-			result, err := searchQuery.Pretty(true).Do(ctx)
+			result, err := query.Pretty(true).Do(context.Background())
 			if err != nil {
 				return nil, err
 			}
 
-			if firstResult.Aggregations == nil {
+			if result.Aggregations == nil {
 				return nil, errors.New("cannot get result aggregations")
 			}
 
@@ -344,7 +341,7 @@ func (r *solarRepo) GetPerformanceLow(duration int, efficiencyFactor float64, fo
 		}
 	}
 
-	return items, err
+	return items, nil
 }
 
 func (r *solarRepo) GetSumPerformanceLow(duration int) ([]*elastic.AggregationBucketCompositeItem, error) {
