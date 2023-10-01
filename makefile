@@ -21,3 +21,6 @@ daily_build:
 
 monthly_build:
 	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o monthly ./cmd/monthly_production/main.go
+
+pa_build:
+	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o performance_alarm ./cmd/performance_alarm/main.go
