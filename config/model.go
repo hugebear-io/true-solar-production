@@ -1,10 +1,12 @@
 package config
 
 type Config struct {
-	Elastic  ElasticsearchConfig `mapstructure:"elasticsearch"`
-	Redis    RedisConfig         `mapstructure:"redis"`
-	Snmp     SnmpConfig          `mapstructure:"snmp"`
-	Solarman InverterConfig      `mapstructure:"solarman"`
+	Elastic             ElasticsearchConfig `mapstructure:"elasticsearch"`
+	Redis               RedisConfig         `mapstructure:"redis"`
+	Snmp                SnmpConfig          `mapstructure:"snmp"`
+	LowPerformanceAlarm AlarmConfig         `mapstructure:"low_performance_alarm"`
+	SumPerformanceAlarm AlarmConfig         `mapstructure:"sum_performance_alarm"`
+	Solarman            InverterConfig      `mapstructure:"solarman"`
 }
 
 type ElasticsearchConfig struct {
@@ -34,4 +36,8 @@ type SnmpConfig struct {
 type InverterConfig struct {
 	CollectorCrontab string `mapstructure:"collector_crontab"`
 	AlarmCrontab     string `mapstructure:"alarm_crontab"`
+}
+
+type AlarmConfig struct {
+	Crontab string `mapstructure:"crontab"`
 }

@@ -10,6 +10,9 @@ dp:
 mp:
 	go run ./cmd/monthly_production/main.go
 
+pa:
+	go run ./cmd/performance_alarm/main.go
+
 mock_invt:
 	go run ./cmd/mock_solarman/main.go
 
