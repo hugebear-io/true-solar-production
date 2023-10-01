@@ -164,7 +164,7 @@ func (s *lowPerformanceAlarmService) Run() error {
 
 		s.logger.Infof("completed to send %d alarms", alarmCount)
 		s.logger.Infof("failed to send %d alarms", failedAlarmCount)
-		s.logger.Infof("polling finished in %.2fs", time.Since(now).String())
+		s.logger.Infof("polling finished in %v", time.Since(now).String())
 	}
 
 	return nil
