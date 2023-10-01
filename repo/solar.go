@@ -286,7 +286,7 @@ func (r *solarRepo) GetPerformanceLow(duration int, efficiencyFactor float64, fo
 		Size(0).
 		Query(elastic.NewBoolQuery().Must(
 			elastic.NewMatchQuery("data_type", constant.DATA_TYPE_PLANT),
-			elastic.NewRangeQuery("@timestamp").Gte("now-7d/d").Lte("now-1d/d"),
+			elastic.NewRangeQuery("@timestamp").Gte(fmt.Sprintf("now-%dd/d", duration)).Lte("now-1d/d"),
 		)).
 		Aggregation("performance_alarm", compositeAggregation)
 
@@ -314,7 +314,7 @@ func (r *solarRepo) GetPerformanceLow(duration int, efficiencyFactor float64, fo
 				Size(0).
 				Query(elastic.NewBoolQuery().Must(
 					elastic.NewMatchQuery("data_type", constant.DATA_TYPE_PLANT),
-					elastic.NewRangeQuery("@timestamp").Gte("now-7d/d").Lte("now-1d/d"),
+					elastic.NewRangeQuery("@timestamp").Gte(fmt.Sprintf("now-%dd/d", duration)).Lte("now-1d/d"),
 				)).
 				Aggregation("performance_alarm", compositeAggregation.AggregateAfter(afterKey))
 
@@ -351,7 +351,7 @@ func (r *solarRepo) GetSumPerformanceLow(duration int) ([]*elastic.AggregationBu
 
 	compositeAggregation := elastic.NewCompositeAggregation().
 		Size(10000).
-		Sources(elastic.NewCompositeAggregationDateHistogramValuesSource("date").Field("@timestamp").CalendarInterval("1d").Format("yyyy-MM-dd"),
+		Sources(elastic.NewCompositeAggregationDateHistogramValuesSource("date").Field("@timestamp").CalendarInterval("day").Format("yyyy-MM-dd"),
 			elastic.NewCompositeAggregationTermsValuesSource("vendor_type").Field("vendor_type.keyword"),
 			elastic.NewCompositeAggregationTermsValuesSource("id").Field("id.keyword")).
 		SubAggregation("max_daily", elastic.NewMaxAggregation().Field("daily_production")).
