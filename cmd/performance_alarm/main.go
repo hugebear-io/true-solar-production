@@ -26,7 +26,7 @@ func main() {
 
 	compositeAggregation := elastic.NewCompositeAggregation().
 		Size(10).
-		Sources(elastic.NewCompositeAggregationDateHistogramValuesSource("date").Field("@timestamp").CalendarInterval("1d").Format("yyyy-MM-dd"),
+		Sources(elastic.NewCompositeAggregationDateHistogramValuesSource("date").Field("@timestamp").CalendarInterval("day").Format("yyyy-MM-dd"),
 			elastic.NewCompositeAggregationTermsValuesSource("vendor_type").Field("vendor_type.keyword"),
 			elastic.NewCompositeAggregationTermsValuesSource("id").Field("id.keyword")).
 		SubAggregation("max_daily", elastic.NewMaxAggregation().Field("daily_production")).
@@ -58,24 +58,23 @@ func main() {
 		)).
 		Aggregation("performance_alarm", compositeAggregation)
 
+	items := make([]*elastic.AggregationBucketCompositeItem, 0)
 	result, err := searchQuery.Pretty(true).Do(context.Background())
 	if err != nil {
 		panic(err)
 	}
 
-	util.PrintJSON(map[string]interface{}{"result": result})
+	if result.Aggregations == nil {
+		panic("no aggregation")
+	}
 
-	// if result.Aggregations == nil {
-	// 	panic("no aggregation")
-	// }
+	performanceAlarm, found := result.Aggregations.Composite("performance_alarm")
+	if !found {
+		panic("no performance_alarm aggregation")
+	}
 
-	// performanceAlarmAgg, found := result.Aggregations.Composite("performance_alarm")
-	// if !found {
-	// 	panic("no performance_alarm aggregation")
-	// }
-
-	// items := make([]*elastic.AggregationBucketCompositeItem, 0)
-	// items = append(items, performanceAlarmAgg.Buckets...)
+	items = append(items, performanceAlarm.Buckets...)
+	util.PrintJSON(map[string]interface{}{"result": items, "after_key": performanceAlarm.AfterKey})
 
 	// if len(performanceAlarmAgg.AfterKey) > 0 {
 	// 	afterKey := performanceAlarmAgg.AfterKey
