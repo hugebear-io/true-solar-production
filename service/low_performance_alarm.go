@@ -156,9 +156,9 @@ func (s *lowPerformanceAlarmService) Run() error {
 				}
 			}
 
-			s.logger.Infof("batch %v completed to send %d alarms", i, batchAlarmCount)
-			s.logger.Infof("batch %v failed to send %d alarms", i, failedBatchAlarmCount)
-			s.logger.Infof("batch %v sleeping for %.2fs", i, constant.PERFORMANCE_ALARM_SNMP_BATCH_DELAY.Seconds())
+			s.logger.Infof("batch %v completed to send %d alarms", i+1, batchAlarmCount)
+			s.logger.Infof("batch %v failed to send %d alarms", i+1, failedBatchAlarmCount)
+			s.logger.Infof("batch %v sleeping for %.2fs", i+1, constant.PERFORMANCE_ALARM_SNMP_BATCH_DELAY.Seconds())
 			time.Sleep(constant.PERFORMANCE_ALARM_SNMP_BATCH_DELAY)
 		}
 
