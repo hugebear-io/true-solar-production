@@ -101,7 +101,7 @@ func (s *lowPerformanceAlarmService) Run() error {
 				}
 			}
 
-			if key != "" {
+			if !util.EmptyString(key) {
 				if item, found := filteredBuckets[key]; found {
 					if count, ok := item["count"].(int); ok {
 						item["count"] = count + 1
