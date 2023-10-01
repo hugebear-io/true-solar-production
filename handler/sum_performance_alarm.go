@@ -56,7 +56,7 @@ func (h *SumPerformanceAlarmHandler) Run() {
 	defer snmpRepo.Close()
 	defer h.logger.Close()
 
-	serv := service.NewLowPerformanceAlarmService(solarRepo, installedCapacityRepo, performanceAlarmConfigRepo, snmpRepo, h.logger)
+	serv := service.NewSumPerformanceAlarmService(solarRepo, installedCapacityRepo, performanceAlarmConfigRepo, snmpRepo, h.logger)
 
 	h.logger.Info("Running sum performance alarm service")
 	if err := serv.Run(); err != nil {

@@ -24,3 +24,9 @@ monthly_build:
 
 pa_build:
 	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o performance_alarm ./cmd/performance_alarm/main.go
+
+mock_invt_build:
+	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o mock_solarman ./cmd/mock_solarman/main.go
+
+invt_build:
+	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o solarman ./cmd/solarman/main.go
