@@ -60,12 +60,12 @@ func (s *lowPerformanceAlarmService) Run() error {
 		s.logger.Error(err)
 		return err
 	}
-	util.PrintJSON(map[string]interface{}{"buckets": buckets})
+	s.logger.Infof("Retrieved %d buckets", len(buckets))
 
 	period := fmt.Sprintf("%s - %s", now.AddDate(0, 0, -duration).Format("02Jan2006"), now.AddDate(0, 0, -1).Format("02Jan2006"))
 	filteredBuckets := make(map[string]map[string]interface{})
 	for _, bucketPtr := range buckets {
-		if bucketPtr == nil {
+		if bucketPtr != nil {
 			bucket := *bucketPtr
 
 			if len(bucket.Key) == 0 {
