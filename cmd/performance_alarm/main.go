@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hugebear-io/true-solar-production/config"
 	"github.com/hugebear-io/true-solar-production/constant"
@@ -103,9 +104,19 @@ func main() {
 			}
 
 			items = append(items, performanceAlarm.Buckets...)
-			break
+
+			if len(performanceAlarm.AfterKey) == 0 {
+				break
+			}
+
+			afterKey = performanceAlarm.AfterKey
 		}
 	}
+
+	fmt.Println("=====================================")
+	fmt.Println("=====================================")
+	fmt.Println("=====================================")
+
 	util.PrintJSON(map[string]interface{}{"result": items, "after_key": performanceAlarm.AfterKey})
 	// if len(performanceAlarmAgg.AfterKey) > 0 {
 	// 	afterKey := performanceAlarmAgg.AfterKey
