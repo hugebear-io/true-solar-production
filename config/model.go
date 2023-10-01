@@ -34,8 +34,9 @@ type SnmpConfig struct {
 }
 
 type InverterConfig struct {
-	CollectorCrontab string `mapstructure:"collector_crontab"`
-	AlarmCrontab     string `mapstructure:"alarm_crontab"`
+	CollectorCrontab      string `mapstructure:"collector_crontab"`
+	NightCollectorCrontab string `mapstructure:"night_collector_crontab"`
+	AlarmCrontab          string `mapstructure:"alarm_crontab"`
 }
 
 type AlarmConfig struct {

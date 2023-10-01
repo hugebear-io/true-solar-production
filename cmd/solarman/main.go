@@ -25,6 +25,7 @@ func main() {
 
 	cron := gocron.NewScheduler(time.Local)
 	cron.Cron(conf.CollectorCrontab).Do(solarmanCollector.Run)
+	cron.Cron(conf.NightCollectorCrontab).Do(solarmanCollector.Run)
 	cron.Cron(conf.AlarmCrontab).Do(solarmanAlarm.Run)
 	cron.StartBlocking()
 }
