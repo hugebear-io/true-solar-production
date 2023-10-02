@@ -202,7 +202,7 @@ func (s *solarmanAlarmService) Run(credential *model.SolarmanCredential) error {
 						}
 
 						for _, alert := range alertList {
-							alertName := alert.GetAlertName()
+							alertName := alert.GetAlertNameInPAAS()
 							alertTime := alert.GetAlertTime()
 							alertTimeStr := strconv.FormatInt(alertTime, 10)
 
@@ -223,6 +223,7 @@ func (s *solarmanAlarmService) Run(credential *model.SolarmanCredential) error {
 									return err
 								}
 
+								// ILeek Fail
 								s.logger.Infof("SendAlarmTrap: %s, %s, %s, %s", name, alert, description, constant.MAJOR_SEVERITY)
 							}
 						}
