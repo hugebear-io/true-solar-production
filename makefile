@@ -30,3 +30,6 @@ mock_invt_build:
 
 invt_build:
 	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o solarman ./cmd/solarman/main.go
+
+invt_alarm_build:
+	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o solarman_alarm ./cmd/solarman_alarm/main.go
