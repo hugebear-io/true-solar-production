@@ -474,7 +474,11 @@ func (s *solarmanCollectorService) run(credential *model.SolarmanCredential, doc
 
 		wg.Go(producer)
 	}
-	wg.Wait()
+
+	if r := wg.WaitAndRecover(); r != nil {
+		s.logger.Warnf("[%v] - SolarmanCollectorService.run(): %v", credential.Username, r.Value)
+		return
+	}
 
 	doneCh <- true
 }
