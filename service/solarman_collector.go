@@ -162,9 +162,9 @@ func (s *solarmanCollectorService) run(credential *model.SolarmanCredential, doc
 				errorCh <- err
 				return
 			}
-			token := tokenResp.GetAccessToken()
 
-			plantList, err := client.GetPlantList(tokenResp.GetAccessToken())
+			token := tokenResp.GetAccessToken()
+			plantList, err := client.GetPlantList(token)
 			if err != nil {
 				s.logger.Errorf("[%v] - SolarmanCollectorService.run(): %v", credential.Username, err)
 				errorCh <- err
@@ -174,6 +174,12 @@ func (s *solarmanCollectorService) run(credential *model.SolarmanCredential, doc
 			plantCount := 1
 			plantSize := len(plantList)
 			for _, station := range plantList {
+				if station == nil {
+					s.logger.Warnf("[%v] - SolarmanCollectorService.run(): some plant of company(%v) is nil", credential.Username, company.GetCompanyID())
+					plantCount++
+					continue
+				}
+
 				s.logger.Infof("[%v] - collecting plant(%v) of company(%v): %v/%v", credential.Username, station.GetID(), company.GetCompanyID(), plantCount, plantSize)
 				plantCount++
 
@@ -232,8 +238,12 @@ func (s *solarmanCollectorService) run(credential *model.SolarmanCredential, doc
 					solarman.TIME_TYPE_DAY,
 					now.Unix(),
 					now.Unix(),
-				); err == nil && len(resp.StationDataItems) > 0 {
-					plantItemDoc.DailyProduction = resp.StationDataItems[0].GenerationValue
+				); err == nil && resp != nil {
+					if resp.StationDataItems != nil {
+						if len(resp.StationDataItems) > 0 {
+							plantItemDoc.DailyProduction = resp.StationDataItems[0].GenerationValue
+						}
+					}
 				}
 
 				if resp, err := client.GetHistoricalPlantData(
@@ -476,7 +486,7 @@ func (s *solarmanCollectorService) run(credential *model.SolarmanCredential, doc
 	}
 
 	if r := wg.WaitAndRecover(); r != nil {
-		s.logger.Warnf("[%v] - SolarmanCollectorService.run(): %v", credential.Username, r.Value)
+		s.logger.Warnf("[%v] - SolarmanCollectorService.run(): caller: %v, value: %v string: %v", credential.Username, r.Callers, r.Value, r.String())
 		return
 	}
 
