@@ -77,7 +77,10 @@ func (h *SolarmanCollectorHandler) run(credential *model.SolarmanCredential) fun
 
 		if err := serv.Run(credential); err != nil {
 			h.logger.Errorf("[%v]Failed to run service: %v", credential.Username, err)
+			return
 		}
+
+		h.logger.Infof("[%v]Finished", credential.Username)
 	}
 }
 
