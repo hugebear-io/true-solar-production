@@ -486,7 +486,7 @@ func (s *solarmanCollectorService) run(credential *model.SolarmanCredential, doc
 	}
 
 	if r := wg.WaitAndRecover(); r != nil {
-		s.logger.Warnf("[%v] - SolarmanCollectorService.run(): caller: %v, value: %v string: %v", credential.Username, r.Callers, r.Value, r.String())
+		s.logger.Warnf("[%v] - SolarmanCollectorService.run(): \ncaller: %v, \nvalue: %v \nstring: %v", credential.Username, r.Callers, r.Value, r.String())
 		return
 	}
 
