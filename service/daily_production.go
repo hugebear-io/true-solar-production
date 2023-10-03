@@ -22,6 +22,8 @@ type dailyProductionService struct {
 	logger         logger.Logger
 }
 
+// TODO: Filter vendor and take only (INVT, HUAWEI, KSTAR, GROWATT)
+// TODO: null -> 0, <=50 -> null
 func NewDailyProductionService(solarRepo repo.SolarRepo, masterSiteRepo repo.MasterSiteRepo, logger logger.Logger) DailyProductionService {
 	return &dailyProductionService{
 		solarRepo:      solarRepo,

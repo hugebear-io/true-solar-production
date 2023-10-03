@@ -60,10 +60,6 @@ func (s *solarmanCollectorService) Run(credential *model.SolarmanCredential) err
 	doneCh := make(chan bool)
 	errorCh := make(chan error)
 	documentCh := make(chan interface{})
-	defer close(doneCh)
-	defer close(errorCh)
-	defer close(documentCh)
-
 	go s.run(credential, documentCh, doneCh, errorCh)
 
 DONE:
@@ -105,6 +101,9 @@ DONE:
 	}
 	s.logger.Infof("[%v] - SolarmanCollectorService.Run(): upserted %v site-documents", credential.Username, len(siteDocuments))
 
+	close(doneCh)
+	close(errorCh)
+	close(documentCh)
 	return nil
 }
 
