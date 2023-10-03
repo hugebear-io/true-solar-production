@@ -47,7 +47,7 @@ func prepareHttpResponse[R interface{}](req *http.Request) (*R, int, error) {
 	}
 	res, err := client.Do(req)
 	if err != nil {
-		return nil, res.StatusCode, err
+		return nil, http.StatusInternalServerError, err
 	}
 	defer res.Body.Close()
 
