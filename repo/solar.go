@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hugebear-io/true-solar-production/config"
@@ -149,10 +150,10 @@ func (r *solarRepo) GetPlantDailyProduction(start, end *time.Time) ([]*elastic.A
 				elastic.NewTermQuery("data_type.keyword", constant.DATA_TYPE_PLANT),
 				elastic.NewRangeQuery("@timestamp").Gte(start).Lt(end).TimeZone("Asia/Bangkok"),
 				elastic.NewTermsQuery("vendor_type.keyword",
-					constant.VENDOR_TYPE_GROWATT,
-					constant.VENDOR_TYPE_HUAWEI,
-					constant.VENDOR_TYPE_INVT,
-					constant.VENDOR_TYPE_KSTAR,
+					strings.ToUpper(constant.VENDOR_TYPE_GROWATT),
+					strings.ToUpper(constant.VENDOR_TYPE_HUAWEI),
+					strings.ToUpper(constant.VENDOR_TYPE_INVT),
+					strings.ToUpper(constant.VENDOR_TYPE_KSTAR),
 				),
 			),
 		).Aggregation("production", compositeAggregation)
@@ -236,10 +237,10 @@ func (r *solarRepo) GetPlantMonthlyProduction(start, end *time.Time) ([]*elastic
 				elastic.NewTermQuery("data_type.keyword", constant.DATA_TYPE_PLANT),
 				elastic.NewRangeQuery("@timestamp").Gte(start).Lt(end).TimeZone("Asia/Bangkok"),
 				elastic.NewTermsQuery("vendor_type.keyword",
-					constant.VENDOR_TYPE_GROWATT,
-					constant.VENDOR_TYPE_HUAWEI,
-					constant.VENDOR_TYPE_INVT,
-					constant.VENDOR_TYPE_KSTAR,
+					strings.ToUpper(constant.VENDOR_TYPE_GROWATT),
+					strings.ToUpper(constant.VENDOR_TYPE_HUAWEI),
+					strings.ToUpper(constant.VENDOR_TYPE_INVT),
+					strings.ToUpper(constant.VENDOR_TYPE_KSTAR),
 				),
 			),
 		).Aggregation("production", compositeAggregation)

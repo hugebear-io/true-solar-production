@@ -112,15 +112,6 @@ GET solarcell-2023.*/_search
             },
             "script": "if (params.installed_capacity == 0 || params.monthly_production == 0 ) { return 0 } else { (params.monthly_production/(params.installed_capacity*5*0.8*31))*100 }"
           }
-        },
-        "criteria": {
-          "bucket_script": {
-            "buckets_path": {
-              "installed_capacity": "installed_capacity",
-              "monthly_production": "monthly_production"
-            },
-            "script": "if (params.installed_capacity == 0 || params.monthly_production == 0) { return 0 } else { return (params.monthly_production / (params.installed_capacity * 5 * 0.8 * 31)) * 100 }"
-          }
         }
       }
     }

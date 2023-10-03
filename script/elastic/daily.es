@@ -23,7 +23,8 @@ GET solarcell-2023*/_search
           "range": {
             "@timestamp": {
               "gte": "now-30d/d",
-              "lte": "now-1d/d"
+              "lte": "now-1d/d",
+              "time_zone": "Asia/Bangkok"
             }
           }
         }
@@ -33,7 +34,7 @@ GET solarcell-2023*/_search
   "aggs": {
     "data": {
       "composite": {
-        "size": 10,
+        "size": 100,
         "sources": [
           {
             "date": {
@@ -109,15 +110,6 @@ GET solarcell-2023*/_search
               "daily_production": "daily_production"
             },
             "script": "if (params.installed_capacity == 0 || params.daily_production == 0 ) { return 0 } else { (params.daily_production/(params.installed_capacity*5*0.8))*100 }"
-          }
-        },
-        "criteria": {
-          "bucket_script": {
-            "buckets_path": {
-              "installed_capacity": "installed_capacity",
-              "monthly_production": "monthly_production"
-            },
-            "script": "if (params.installed_capacity == 0 || params.monthly_production == 0) { return 0 } else { return (params.monthly_production / (params.installed_capacity * 5 * 0.8)) * 100 }"
           }
         }
       }
