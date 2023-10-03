@@ -39,6 +39,12 @@ func NewSolarmanAlarmService(snmpRepo repo.SnmpRepo, redisClient *redis.Client, 
 }
 
 func (s *solarmanAlarmService) Run(credential *model.SolarmanCredential) error {
+	defer func() {
+		if r := recover(); r != nil {
+			s.logger.Warnf("[%v] - SolarmanAlarmService.Run(): %v", credential.Username, r)
+		}
+	}()
+
 	ctx := context.Background()
 	now := time.Now()
 	beginningOfDay := time.Date(now.Year(), now.Month(), now.Day(), 6, 0, 0, 0, time.Local)
@@ -87,8 +93,9 @@ func (s *solarmanAlarmService) Run(credential *model.SolarmanCredential) error {
 			s.logger.Errorf("accesstoken should not be empty")
 			return errors.New("accesstoken should not be empty")
 		}
+		token := tokenResp.GetAccessToken()
 
-		plantList, err := client.GetPlantList(tokenResp.GetAccessToken())
+		plantList, err := client.GetPlantList(token)
 		if err != nil {
 			s.logger.Error(err)
 			return err
@@ -103,7 +110,7 @@ func (s *solarmanAlarmService) Run(credential *model.SolarmanCredential) error {
 			stationID := plant.GetID()
 			stationName := plant.GetName()
 
-			deviceList, err := client.GetPlantDeviceList(tokenResp.GetAccessToken(), stationID)
+			deviceList, err := client.GetPlantDeviceList(token, stationID)
 			if err != nil {
 				s.logger.Error(err)
 				return err
@@ -195,7 +202,7 @@ func (s *solarmanAlarmService) Run(credential *model.SolarmanCredential) error {
 							}
 						}
 					case 2:
-						alertList, err := client.GetDeviceAlertList(tokenResp.GetAccessToken(), deviceSN, beginningOfDay.Unix(), now.Unix())
+						alertList, err := client.GetDeviceAlertList(token, deviceSN, beginningOfDay.Unix(), now.Unix())
 						if err != nil {
 							s.logger.Error(err)
 							return err

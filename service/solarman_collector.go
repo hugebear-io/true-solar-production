@@ -288,6 +288,11 @@ func (s *solarmanCollectorService) run(credential *model.SolarmanCredential, doc
 					s.logger.Infof("[%v] - collecting device(%v) of plant(%v): %v/%v", credential.Username, device.GetDeviceSN(), stationID, deviceCount, deviceSize)
 					deviceCount++
 
+					if device == nil {
+						s.logger.Warnf("[%v] - SolarmanCollectorService.run(): some device of plant(%v) is nil", credential.Username, stationID)
+						continue
+					}
+
 					deviceSN := device.GetDeviceSN()
 					deviceID := device.GetDeviceID()
 
