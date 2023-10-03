@@ -1,9 +1,33 @@
-GET solarcell-2023.*/_search
+GET solarcell-2023*/_search
 {
   "size": 0,
   "query": {
-    "match": {
-      "data_type": "PLANT"
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "data_type.keyword": "PLANT"
+          }
+        },
+        {
+          "terms": {
+            "vendor_type.keyword": [
+              "HUAWEI",
+              "INVT",
+              "GROWATT",
+              "KSTAR"
+            ]
+          }
+        },
+        {
+          "range": {
+            "@timestamp": {
+              "gte": "now-30d/d",
+              "lte": "now-1d/d"
+            }
+          }
+        }
+      ]
     }
   },
   "aggs": {

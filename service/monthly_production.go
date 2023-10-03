@@ -145,6 +145,8 @@ func (s monthlyProductionService) generateDocuments(start, end *time.Time) ([]in
 			}
 		}
 
+		doc.ClearZeroValue()
+
 		count += 1
 		s.logger.Infof("[%v/%v] generateDocument of %v", count, size, start.Format(constant.YEAR_MONTH))
 		documents = append(documents, doc)
@@ -174,6 +176,7 @@ func (s monthlyProductionService) generateDocuments(start, end *time.Time) ([]in
 			ProductionToTarget: nil,
 			Criteria:           nil,
 		}
+		doc.ClearZeroValue()
 
 		count += 1
 		s.logger.Infof("[%v/%v] non-exist generateDocument of %v", count, size, start.Format(constant.YEAR_MONTH_DAY))

@@ -22,8 +22,6 @@ type dailyProductionService struct {
 	logger         logger.Logger
 }
 
-// TODO: Filter vendor and take only (INVT, HUAWEI, KSTAR, GROWATT)
-// TODO: null -> 0, <=50 -> null
 func NewDailyProductionService(solarRepo repo.SolarRepo, masterSiteRepo repo.MasterSiteRepo, logger logger.Logger) DailyProductionService {
 	return &dailyProductionService{
 		solarRepo:      solarRepo,
@@ -147,6 +145,8 @@ func (s dailyProductionService) generateDocuments(start, end *time.Time) ([]inte
 			}
 		}
 
+		doc.ClearZeroValue()
+
 		count += 1
 		s.logger.Infof("[%v/%v] generateDocument of %v", count, size, start.Format(constant.YEAR_MONTH_DAY))
 		documents = append(documents, doc)
@@ -176,6 +176,7 @@ func (s dailyProductionService) generateDocuments(start, end *time.Time) ([]inte
 			ProductionToTarget: nil,
 			Criteria:           nil,
 		}
+		doc.ClearZeroValue()
 
 		count += 1
 		s.logger.Infof("[%v/%v] non-exist generateDocument of %v", count, size, start.Format(constant.YEAR_MONTH_DAY))

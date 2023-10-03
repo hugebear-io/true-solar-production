@@ -75,18 +75,29 @@ func (d *MonthlyProductionDocument) SetCriteria(data *float64) {
 	}
 
 	value := pointy.Float64Value(data, 0)
-	var criteria string
 	if value >= 100 {
-		criteria = ">=100%"
+		d.Criteria = pointy.String(">=100%")
 	} else if value >= 80 {
-		criteria = ">=80%"
+		d.Criteria = pointy.String(">=80%")
 	} else if value >= 60 {
-		criteria = ">=60%"
+		d.Criteria = pointy.String(">=60%")
 	} else if value >= 50 {
-		criteria = ">=50%"
+		d.Criteria = pointy.String(">=50%")
 	} else {
-		criteria = "<50%"
+		d.Criteria = nil
+	}
+}
+
+func (d *MonthlyProductionDocument) ClearZeroValue() {
+	if d.MonthlyProduction == nil {
+		d.MonthlyProduction = pointy.Float64(0)
 	}
 
-	d.Criteria = &criteria
+	if d.Target == nil {
+		d.Target = pointy.Float64(0)
+	}
+
+	if d.ProductionToTarget == nil {
+		d.ProductionToTarget = pointy.Float64(0)
+	}
 }

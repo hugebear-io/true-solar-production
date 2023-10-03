@@ -146,8 +146,14 @@ func (r *solarRepo) GetPlantDailyProduction(start, end *time.Time) ([]*elastic.A
 		Size(0).
 		Query(
 			elastic.NewBoolQuery().Must(
-				elastic.NewMatchQuery("data_type", constant.DATA_TYPE_PLANT),
-				elastic.NewRangeQuery("@timestamp").Gte(start).Lt(end),
+				elastic.NewTermQuery("data_type.keyword", constant.DATA_TYPE_PLANT),
+				elastic.NewRangeQuery("@timestamp").Gte(start).Lt(end).TimeZone("Asia/Bangkok"),
+				elastic.NewTermsQuery("vendor_type.keyword",
+					constant.VENDOR_TYPE_GROWATT,
+					constant.VENDOR_TYPE_HUAWEI,
+					constant.VENDOR_TYPE_INVT,
+					constant.VENDOR_TYPE_KSTAR,
+				),
 			),
 		).Aggregation("production", compositeAggregation)
 
@@ -227,8 +233,14 @@ func (r *solarRepo) GetPlantMonthlyProduction(start, end *time.Time) ([]*elastic
 		Size(0).
 		Query(
 			elastic.NewBoolQuery().Must(
-				elastic.NewMatchQuery("data_type", constant.DATA_TYPE_PLANT),
-				elastic.NewRangeQuery("@timestamp").Gte(start).Lt(end),
+				elastic.NewTermQuery("data_type.keyword", constant.DATA_TYPE_PLANT),
+				elastic.NewRangeQuery("@timestamp").Gte(start).Lt(end).TimeZone("Asia/Bangkok"),
+				elastic.NewTermsQuery("vendor_type.keyword",
+					constant.VENDOR_TYPE_GROWATT,
+					constant.VENDOR_TYPE_HUAWEI,
+					constant.VENDOR_TYPE_INVT,
+					constant.VENDOR_TYPE_KSTAR,
+				),
 			),
 		).Aggregation("production", compositeAggregation)
 

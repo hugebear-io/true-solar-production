@@ -3,9 +3,34 @@ GET solarcell-2023.*/_search
 {
   "size": 0,
   "query": {
-    "match": {
-      "data_type": "PLANT"
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "data_type.keyword": "PLANT"
+          }
+        },
+        {
+          "terms": {
+            "vendor_type.keyword": [
+              "HUAWEI",
+              "INVT",
+              "GROWATT",
+              "KSTAR"
+            ]
+          }
+        },
+        {
+          "range": {
+            "@timestamp": {
+              "gte": "now-365d/d",
+              "lte": "now-1d/d"
+            }
+          }
+        }
+      ]
     }
+
   },
   "aggs": {
     "data": {
@@ -76,7 +101,6 @@ GET solarcell-2023.*/_search
               "installed_capacity": "installed_capacity",
               "daily_production": "daily_production"
             },
-            // TODO: change daily_production to monthly_production
             "script": "if (params.installed_capacity == 0 || params.daily_production == 0 ) { return 0 } else { (params.installed_capacity*5*0.8*31) }"
           }
         },
