@@ -14,7 +14,8 @@ const (
 	AUTHORIZATION_HEADER          = "Authorization"
 	MAX_PAGE_SIZE                 = 200
 	SOLARMAN_DEVICE_TYPE_INVERTER = "INVERTER"
-	WAIT_TIME                     = 30 * time.Second
+	RETRY_WAIT_TIME               = 30 * time.Second
+	RETRY_ATTEMPT                 = 3
 )
 
 const (

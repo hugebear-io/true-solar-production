@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/avast/retry-go"
 	"github.com/bytedance/sonic"
 	"github.com/hugebear-io/true-solar-production/util"
 )
@@ -45,9 +46,27 @@ func prepareHttpResponse[R interface{}](req *http.Request) (*R, int, error) {
 	client := &http.Client{
 		Timeout: time.Duration(300) * time.Second,
 	}
+
 	res, err := client.Do(req)
 	if err != nil {
-		return nil, http.StatusInternalServerError, err
+		retryOptions := []retry.Option{
+			retry.Delay(RETRY_WAIT_TIME),
+			retry.Attempts(RETRY_ATTEMPT),
+			retry.DelayType(retry.FixedDelay),
+		}
+
+		err := retry.Do(func() error {
+			res, err = client.Do(req)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}, retryOptions...)
+
+		if err != nil {
+			return nil, http.StatusInternalServerError, err
+		}
 	}
 	defer res.Body.Close()
 
