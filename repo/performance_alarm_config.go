@@ -9,6 +9,7 @@ import (
 type PerformanceAlarmConfigRepo interface {
 	GetLowPerformanceAlarmConfig() (*model.PerformanceAlarmConfig, error)
 	GetSumPerformanceAlarmConfig() (*model.PerformanceAlarmConfig, error)
+	GetDailyPerformanceAlarmConfig() (*model.PerformanceAlarmConfig, error)
 }
 
 type performanceAlarmConfigRepo struct {
@@ -35,6 +36,16 @@ func (r *performanceAlarmConfigRepo) GetSumPerformanceAlarmConfig() (*model.Perf
 	tx := r.db.Session(&gorm.Session{})
 	data := model.PerformanceAlarmConfig{}
 	if err := tx.Find(&data, "name = ?", constant.SUM_PERFORMANCE_ALARM).Error; err != nil {
+		return nil, err
+	}
+
+	return &data, nil
+}
+
+func (r *performanceAlarmConfigRepo) GetDailyPerformanceAlarmConfig() (*model.PerformanceAlarmConfig, error) {
+	tx := r.db.Session(&gorm.Session{})
+	data := model.PerformanceAlarmConfig{}
+	if err := tx.Find(&data, "name = ?", constant.DAILY_PERFORMANCE_ALARM).Error; err != nil {
 		return nil, err
 	}
 

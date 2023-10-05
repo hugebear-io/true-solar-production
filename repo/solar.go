@@ -19,20 +19,25 @@ type SolarRepo interface {
 	GetPlantMonthlyProduction(start, end *time.Time) ([]*elastic.AggregationBucketCompositeItem, error)
 	UpsertSiteStation(docs []model.SiteItem) error
 	GetPerformanceLow(duration int, efficiencyFactor float64, focusHour int, thresholdPct float64) ([]*elastic.AggregationBucketCompositeItem, error)
+	GetPerformanceByDate(date *time.Time, efficiencyFactor float64, focusHour int, thresholdPct float64) ([]*elastic.AggregationBucketCompositeItem, error)
 	GetSumPerformanceLow(duration int) ([]*elastic.AggregationBucketCompositeItem, error)
 }
 
 type solarRepo struct {
 	elastic *elastic.Client
+	config  config.ElasticsearchConfig
 }
 
 func NewSolarRepo(elastic *elastic.Client) SolarRepo {
-	return &solarRepo{elastic: elastic}
+	conf := config.GetConfig().Elastic
+	return &solarRepo{
+		elastic: elastic,
+		config:  conf,
+	}
 }
 
 func (r *solarRepo) searchIndex() *elastic.SearchService {
-	conf := config.GetConfig().Elastic
-	index := fmt.Sprintf("%v*", conf.SolarIndex)
+	index := fmt.Sprintf("%v*", r.config.SolarIndex)
 	return r.elastic.Search(index)
 }
 
@@ -265,6 +270,106 @@ func (r *solarRepo) GetPlantMonthlyProduction(start, end *time.Time) ([]*elastic
 
 	items = append(items, productions.Buckets...)
 	return items, nil
+}
+
+func (r *solarRepo) GetPerformanceByDate(date *time.Time, efficiencyFactor float64, focusHour int, thresholdPct float64) ([]*elastic.AggregationBucketCompositeItem, error) {
+	ctx := context.Background()
+	compositeAggregation := elastic.NewCompositeAggregation().
+		Size(10000).
+		Sources(elastic.NewCompositeAggregationDateHistogramValuesSource("date").Field("@timestamp").CalendarInterval("day").Format("yyyy-MM-dd"),
+			elastic.NewCompositeAggregationTermsValuesSource("vendor_type").Field("vendor_type.keyword"),
+			elastic.NewCompositeAggregationTermsValuesSource("id").Field("id.keyword")).
+		SubAggregation("daily", elastic.NewMaxAggregation().Field("daily_production")).
+		SubAggregation("capacity", elastic.NewAvgAggregation().Field("installed_capacity")).
+		SubAggregation("threshold", elastic.NewBucketScriptAggregation().
+			BucketsPathsMap(map[string]string{"capacity": "capacity"}).
+			Script(elastic.NewScript("params.capacity * params.efficiency_factor * params.focus_hour * params.threshold_percentage").
+				Params(map[string]interface{}{
+					"efficiency_factor":    efficiencyFactor,
+					"focus_hour":           focusHour,
+					"threshold_percentage": thresholdPct,
+				}))).
+		SubAggregation("hits", elastic.NewTopHitsAggregation().
+			Size(1).
+			FetchSourceContext(
+				elastic.NewFetchSourceContext(true).Include(
+					"id", "name", "vendor_type", "node_type", "ac_phase", "plant_status",
+					"area", "site_id", "site_city_code", "site_city_name", "installed_capacity",
+				)))
+
+	collectorIndex := fmt.Sprintf("%s-%s", r.config.SolarIndex, date.Format("2006.01.02"))
+	searchQuery := r.elastic.Search(collectorIndex).
+		Size(0).
+		Query(elastic.NewBoolQuery().Must(
+			elastic.NewMatchQuery("data_type", constant.DATA_TYPE_PLANT),
+			elastic.NewTermsQuery("vendor_type.keyword",
+				strings.ToUpper(constant.VENDOR_TYPE_GROWATT),
+				strings.ToUpper(constant.VENDOR_TYPE_HUAWEI),
+				strings.ToUpper(constant.VENDOR_TYPE_INVT),
+				strings.ToUpper(constant.VENDOR_TYPE_KSTAR),
+			),
+		)).
+		Aggregation("performance_alarm", compositeAggregation)
+
+	items := make([]*elastic.AggregationBucketCompositeItem, 0)
+	result, err := searchQuery.Pretty(true).Do(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if result.Aggregations == nil {
+		return nil, errors.New("cannot get result aggregations")
+	}
+
+	performanceAlarm, found := result.Aggregations.Composite("performance_alarm")
+	if !found {
+		return nil, errors.New("cannot get result composite performance alarm")
+	}
+
+	items = append(items, performanceAlarm.Buckets...)
+	if len(performanceAlarm.AfterKey) > 0 {
+		afterKey := performanceAlarm.AfterKey
+
+		for {
+			query := r.searchIndex().
+				Size(0).
+				Query(elastic.NewBoolQuery().Must(
+					elastic.NewMatchQuery("data_type", constant.DATA_TYPE_PLANT),
+					elastic.NewTermsQuery("vendor_type.keyword",
+						strings.ToUpper(constant.VENDOR_TYPE_GROWATT),
+						strings.ToUpper(constant.VENDOR_TYPE_HUAWEI),
+						strings.ToUpper(constant.VENDOR_TYPE_INVT),
+						strings.ToUpper(constant.VENDOR_TYPE_KSTAR),
+					),
+				)).
+				Aggregation("performance_alarm", compositeAggregation.AggregateAfter(afterKey))
+
+			result, err := query.Pretty(true).Do(ctx)
+			if err != nil {
+				return nil, err
+			}
+
+			if result.Aggregations == nil {
+				return nil, errors.New("cannot get result aggregations")
+			}
+
+			performanceAlarm, found := result.Aggregations.Composite("performance_alarm")
+			if !found {
+				return nil, errors.New("cannot get result composite performance alarm")
+			}
+
+			items = append(items, performanceAlarm.Buckets...)
+
+			if len(performanceAlarm.AfterKey) == 0 {
+				break
+			}
+
+			afterKey = performanceAlarm.AfterKey
+		}
+	}
+
+	return items, nil
+
 }
 
 func (r *solarRepo) GetPerformanceLow(duration int, efficiencyFactor float64, focusHour int, thresholdPct float64) ([]*elastic.AggregationBucketCompositeItem, error) {

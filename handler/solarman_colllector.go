@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"time"
+
 	"github.com/gammazero/workerpool"
 	"github.com/hugebear-io/true-solar-production/constant"
 	"github.com/hugebear-io/true-solar-production/infra"
@@ -31,7 +33,19 @@ func NewSolarmanCollectorHandler() *SolarmanCollectorHandler {
 }
 
 func (h *SolarmanCollectorHandler) Run() {
+	h.logger = logger.NewLogger(
+		&logger.LoggerOption{
+			LogName:     constant.GetLogName(constant.SOLARMAN_COLLECTOR_LOG_NAME),
+			LogSize:     1024,
+			LogAge:      90,
+			LogBackup:   1,
+			LogCompress: false,
+			LogLevel:    logger.LOG_LEVEL_DEBUG,
+			SkipCaller:  1,
+		},
+	)
 	defer h.logger.Close()
+
 	db, err := infra.NewGormDB()
 	if err != nil {
 		h.logger.Error(err)
@@ -55,6 +69,7 @@ func (h *SolarmanCollectorHandler) Run() {
 
 func (h *SolarmanCollectorHandler) run(credential *model.SolarmanCredential) func() {
 	return func() {
+		now := time.Now()
 		elastic, err := infra.NewElasticsearch()
 		if err != nil {
 			h.logger.Errorf("[%v]Failed to connect to elasticsearch", credential.Username)
@@ -80,7 +95,7 @@ func (h *SolarmanCollectorHandler) run(credential *model.SolarmanCredential) fun
 			return
 		}
 
-		h.logger.Infof("[%v]Finished", credential.Username)
+		h.logger.Infof("[%v] Finished in %v", credential.Username, time.Since(now).String())
 	}
 }
 

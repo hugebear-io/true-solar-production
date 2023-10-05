@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"time"
+
 	"github.com/gammazero/workerpool"
 	"github.com/hugebear-io/true-solar-production/constant"
 	"github.com/hugebear-io/true-solar-production/infra"
@@ -31,6 +33,17 @@ func NewSolarmanAlarmHandler() *SolarmanAlarmHandler {
 }
 
 func (h *SolarmanAlarmHandler) Run() {
+	h.logger = logger.NewLogger(
+		&logger.LoggerOption{
+			LogName:     constant.GetLogName(constant.SOLARMAN_ALARM_LOG_NAME),
+			LogSize:     1024,
+			LogAge:      90,
+			LogBackup:   1,
+			LogCompress: false,
+			LogLevel:    logger.LOG_LEVEL_DEBUG,
+			SkipCaller:  1,
+		},
+	)
 	defer h.logger.Close()
 
 	db, err := infra.NewGormDB()
@@ -56,6 +69,7 @@ func (h *SolarmanAlarmHandler) Run() {
 
 func (h *SolarmanAlarmHandler) run(credential *model.SolarmanCredential) func() {
 	return func() {
+		now := time.Now()
 		snmp, err := infra.NewSnmp()
 		if err != nil {
 			h.logger.Errorf("[%v]Failed to connect to snmp", credential.Username)
@@ -77,7 +91,7 @@ func (h *SolarmanAlarmHandler) run(credential *model.SolarmanCredential) func() 
 			h.logger.Errorf("[%v]Failed to run service: %v", credential.Username, err)
 			return
 		}
-		h.logger.Infof("[%v]Finished", credential.Username)
+		h.logger.Infof("[%v] Finished in %v", credential.Username, time.Since(now).String())
 	}
 }
 
