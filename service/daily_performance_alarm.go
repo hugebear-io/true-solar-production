@@ -74,7 +74,15 @@ func (s *dailyPerformanceAlarmService) Run() error {
 		return err
 	}
 
+	s.logger.Infof("Found %d buckets", len(buckets))
+	var failAlarmCount int
+	var clearAlarmCount int
+	var count int = 1
+	size := len(buckets)
 	for _, bucketPtr := range buckets {
+		s.logger.Infof("Processing bucket %d/%v", count, size)
+		count++
+
 		if bucketPtr == nil {
 			continue
 		}
@@ -122,7 +130,16 @@ func (s *dailyPerformanceAlarmService) Run() error {
 				s.logger.Error(err)
 				continue
 			}
+
+			s.logger.Infof("SendAlarmTrap: %s, %s, %s, %s", plantName, alarmName, payload, severity)
+			if severity == constant.MAJOR_SEVERITY {
+				failAlarmCount++
+			} else {
+				clearAlarmCount++
+			}
 		}
+
+		s.logger.Infof("Sending alarm fail: %v, clear: %v", failAlarmCount, clearAlarmCount)
 	}
 
 	return nil
