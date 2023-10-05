@@ -66,8 +66,7 @@ func (s *dailyPerformanceAlarmService) Run() error {
 	percentage := config.Percentage / 100.0
 	s.logger.Infof("Retrieving daily performance alarm service with duration: %d, percentage: %.2f%%, efficiency factor: %.2f, focus hour: %v", duration, percentage*100.0, efficiencyFactor, focusHour)
 
-	// date := now.AddDate(0, 0, -1)
-	date := time.Date(2023, 10, 1, 0, 0, 0, 0, time.UTC)
+	date := now.AddDate(0, 0, -1)
 	buckets, err := s.solarRepo.GetPerformanceByDate(&date, efficiencyFactor, focusHour, percentage)
 	if err != nil {
 		s.logger.Error(err)
