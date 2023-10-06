@@ -1,24 +1,32 @@
 package main
 
 import (
-	"github.com/hugebear-io/true-solar-production/inverter/huawei"
-	"github.com/hugebear-io/true-solar-production/util"
+	"fmt"
+
+	"github.com/hugebear-io/true-solar-production/config"
+	"github.com/hugebear-io/true-solar-production/constant"
+	"github.com/hugebear-io/true-solar-production/infra"
+	"github.com/hugebear-io/true-solar-production/repo"
 )
 
+func init() {
+	config.InitConfig()
+}
+
+func init() {
+}
+
 func main() {
-	client, err := huawei.NewHuaweiClient(&huawei.HuaweiCredential{
-		Username: "trueapi",
-		Password: "Trueapi12@",
-	})
-
+	db, err := infra.NewGormDB()
 	if err != nil {
 		panic(err)
 	}
 
-	res, err := client.GetPlantList()
+	repo := repo.NewHuaweiCredentialRepo(db)
+	data, err := repo.GetCredentialsByOwner(constant.TRUE_OWNER)
 	if err != nil {
 		panic(err)
 	}
 
-	util.PrintJSON(res)
+	fmt.Println(data)
 }

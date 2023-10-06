@@ -8,6 +8,7 @@ type Config struct {
 	SumPerformanceAlarm   AlarmConfig         `mapstructure:"sum_performance_alarm"`
 	DailyPerformanceAlarm AlarmConfig         `mapstructure:"daily_performance_alarm"`
 	Solarman              InverterConfig      `mapstructure:"solarman"`
+	Huawei                InverterConfig      `mapstructure:"huawei"`
 }
 
 type ElasticsearchConfig struct {

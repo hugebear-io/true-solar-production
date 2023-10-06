@@ -10,6 +10,7 @@ const (
 	LOW_PERFORMANCE_ALARM_LOG_NAME   = "low_performance_alarm.log"
 	SUM_PERFORMANCE_ALARM_LOG_NAME   = "sum_performance_alarm.log"
 	DAILY_PERFORMANCE_ALARM_LOG_NAME = "daily_performance_alarm.log"
+	HUAWEI_COLLECTOR_LOG_NAME        = "huawei_collector.log"
 )
 
 func GetLogName(logName string) string {

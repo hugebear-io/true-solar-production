@@ -13,6 +13,16 @@ import (
 type HuaweiClient interface {
 	GetToken(username, password string) (string, error)
 	GetPlantList() (*GetPlantListResponse, error)
+	GetRealtimePlantData(plantCode string) (*GetRealtimePlantDataResponse, error)
+	GetDailyPlantData(plantCode string, timestamp int64) (*GetHistoricalPlantDataResponse, error)
+	GetMonthlyPlantData(plantCode string, timestamp int64) (*GetHistoricalPlantDataResponse, error)
+	GetYearlyPlantData(plantCode string, timestamp int64) (*GetHistoricalPlantDataResponse, error)
+	GetDeviceList(plantCode string) (*GetDeviceListResponse, error)
+	GetRealtimeDeviceData(deviceID, deviceTypeID string) (*GetRealtimeDeviceDataResponse, error)
+	GetDailyDeviceData(deviceID, deviceTypeID string, timestamp int64) (*GetHistoricalDeviceDataResponse, error)
+	GetMonthlyDeviceData(deviceID, deviceTypeID string, timestamp int64) (*GetHistoricalDeviceDataResponse, error)
+	GetYearlyDeviceData(deviceID, deviceTypeID string, timestamp int64) (*GetHistoricalDeviceDataResponse, error)
+	GetDeviceAlarmList(plantCode string, from, to int64) (*GetDeviceAlarmListResponse, error)
 }
 
 type HuaweiCredential struct {

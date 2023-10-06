@@ -1,9 +1,6 @@
 apply_schema:
 	atlas schema apply --url "sqlite://database.db" --to "file://script/schema.hcl"
 
-api:
-	go run ./cmd/api/main.go
-
 dp:
 	go run ./cmd/daily_production/main.go
 
@@ -33,3 +30,12 @@ invt_build:
 
 invt_alarm_build:
 	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o solarman_alarm ./cmd/solarman_alarm/main.go
+
+test:
+	go run ./cmd/api/main.go
+
+huawei:
+	go run ./cmd/huawei/main.go
+
+huawei_build:
+	env GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags "-linkmode external" -o huawei ./cmd/huawei/main.go

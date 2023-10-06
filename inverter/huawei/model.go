@@ -1286,6 +1286,15 @@ type HistoricalDeviceData struct {
 	DataItemMap *HistoricalDeviceItem `json:"dataItemMap,omitempty"`
 }
 
+func (d *HistoricalDeviceData) GetCollectTime(defaultValue ...int64) int64 {
+	value := int64(0)
+	if len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return pointy.Int64Value(d.CollectTime, value)
+}
+
 func (d *HistoricalDeviceData) GetID(defaultValue ...interface{}) interface{} {
 	value := interface{}(nil)
 	if len(defaultValue) > 0 {
