@@ -173,16 +173,13 @@ func (s *huaweiAlarmService) Run(credential *model.HuaweiCredential) error {
 			s.logger.Infof("[%v] - huaweiAlarmService.Run(): start device %v/%v", credential.Username, deviceCount, deviceSize)
 			deviceCount++
 
-			println(176)
 			if device.GetTypeID() == 1 {
-				println(178)
 				realtimeDevice := mapInverterIDToRealtimeData[deviceID].DataItemMap
 				if realtimeDevice == nil {
 					s.logger.Warnf("realtimeDevice is nil, deviceID: %d", deviceID)
 					continue
 				}
 
-				println(185)
 				if realtimeDevice.GetStatus(10) == 0 {
 					shutdownTime := strconv.Itoa(int(endTime))
 					if mapInverterIDToRealtimeData[deviceID].DataItemMap != nil {
@@ -214,9 +211,7 @@ func (s *huaweiAlarmService) Run(credential *model.HuaweiCredential) error {
 				}
 			}
 
-			println(217)
 			if len(mapDeviceSNToAlarm[deviceSN]) > 0 {
-				println(219)
 				for _, alarm := range mapDeviceSNToAlarm[deviceSN] {
 					alarmName := alarm.GetAlarmName()
 					alarmCause := alarm.GetAlarmCause()
@@ -242,13 +237,12 @@ func (s *huaweiAlarmService) Run(credential *model.HuaweiCredential) error {
 				continue
 			}
 
-			println(245)
 			var keys []string
 			var cursor uint64
 			for {
 				var scanKeys []string
 				match := fmt.Sprintf("Huawei,%s,%s,%s,*", plantCode, deviceSN, deviceName)
-				scanKeys, cursor, err := s.redisClient.Scan(ctx, cursor, match, 10).Result()
+				scanKeys, cursor, err = s.redisClient.Scan(ctx, cursor, match, 10).Result()
 				if err != nil {
 					s.logger.Error(err)
 					return err
@@ -260,7 +254,6 @@ func (s *huaweiAlarmService) Run(credential *model.HuaweiCredential) error {
 				}
 			}
 
-			println(263)
 			for _, key := range keys {
 				val, err := s.redisClient.Get(ctx, key).Result()
 				if err != nil {
