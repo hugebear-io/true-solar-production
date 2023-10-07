@@ -27,5 +27,4 @@ func main() {
 	cron.Cron(conf.NightCollectorCrontab).Do(collector.Run)
 	cron.Cron(conf.AlarmCrontab).Do(alarm.Run)
 	cron.StartBlocking()
-	alarm.Mock()
 }
